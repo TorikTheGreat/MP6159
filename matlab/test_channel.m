@@ -83,9 +83,10 @@ reset(chan);                       % realizacion nueva
 
 fprintf('\n=== Canal aplicado a una forma de onda 802.11be ===\n');
 fprintf('  PSDU              : %d bits\n', numel(txPSDU{1}));
-fprintf('  Forma de onda Tx  : %d muestras x %d antenas\n', size(txPad,1), size(txPad,2));
+fprintf('  Forma de onda Tx  : %d muestras x %d antenas\n', size(txWaveform,1), size(txWaveform,2));
+fprintf('  Con relleno       : %d muestras (50 ceros de cola)\n', size(txPad,1));
 fprintf('  Señal recibida    : %d muestras x %d antenas\n', size(rxWaveform,1), size(rxWaveform,2));
-fprintf('  Duracion          : %.1f us\n', size(txPad,1)/chan.SampleRate*1e6);
+fprintf('  Duracion del PPDU : %.1f us\n', size(txWaveform,1)/chan.SampleRate*1e6);
 fprintf('  Ganancias         : %s (muestras x trayectos x Tx x Rx)\n', mat2str(size(pathGains)));
 
 %% Figura 1 - perfil de potencia-retardo ------------------------------------
@@ -126,8 +127,10 @@ exportgraphics(f2, '../figuras/fig2_respuesta_frecuencia.png', 'Resolution', 150
 %% Figura 3 - comparacion de perfiles (solo PDP, SIN simular el enlace) -----
 % El enunciado prohibe barrer escenarios de canal: esto NO simula ningun
 % enlace, solo grafica los perfiles de retardo nominales para justificar la
-% eleccion. Cada perfil se situa por encima de SU breakpoint, para que los
-% tres esten en el mismo regimen NLOS que nuestro escenario.
+% eleccion. Cada perfil se situa por encima de SU breakpoint para que los tres
+% objetos esten en el mismo regimen NLOS que nuestro escenario; esto NO cambia
+% el PDP que devuelve info() (que es el promedio normalizado), pero evita que
+% el rotulo diga NLOS mientras el objeto esta configurado en LOS.
 perfiles = {'Model-B','Model-D','Model-F'};
 distancias = [6 11 31];        % breakpoint + 1 m  (5, 10, 30)
 f3 = figure('Visible','off','Position',[100 100 950 320]);

@@ -86,7 +86,8 @@ $$B_c \approx \frac{1}{5\,\tau_{rms}} \approx 4\ \text{MHz}$$
 
 Sobre los 80 MHz del canal eso da del orden de **una veintena de desvanecimientos independientes
 a lo ancho de la banda**. La figura `fig2_respuesta_frecuencia.png` muestra una realización
-concreta, donde se cuentan unos diez o doce nulos profundos — el número exacto en una sola
+concreta, con siete u ocho mínimos locales por traza y unos pocos nulos por debajo de −15 dB —
+el número exacto en una sola
 realización es una variable aleatoria, y `80/B_c` es un promedio, no una predicción. Lo que la
 figura sí demuestra sin ambigüedad es que **el canal varía decenas de dB dentro del mismo
 canal de 80 MHz**: es genuinamente selectivo en frecuencia, no un caso trivial.
@@ -98,10 +99,21 @@ canal de 80 MHz**: es genuinamente selectivo en frecuencia, no un caso trivial.
   80 MHz frente a la veintena de Model‑D. Es un escenario residencial y produce una degradación
   más suave; sirve para un ejemplo introductorio, no para exhibir el efecto del multitrayecto.
   *(Es, sin embargo, el que usa el ejemplo oficial — ver §7.)*
+- **Model‑C** (τ_rms 30 ns, τ_max 200 ns) cumple el criterio del prefijo cíclico con holgura,
+  pero es la mitad de selectivo que Model‑D (`B_c ≈ 6.7 MHz`, ~12 desvanecimientos) y su escenario
+  es «residencial / oficina pequeña»: menos representativo y menos exigente.
+- **Model‑E** (τ_rms 100 ns, τ_max 730 ns) **es el competidor serio, y hay que decirlo**: sería
+  *el doble* de selectivo que Model‑D (`B_c ≈ 2 MHz`, ~40 desvanecimientos) y su retardo máximo
+  todavía cabe en los 800 ns del prefijo. Lo descartamos por dos razones. Primera, el margen es
+  de solo **70 ns**, y el matiz que enunciamos abajo —el error de sincronización de temporización
+  consume parte de la ventana— se lo comería: estaríamos operando al filo del prefijo y una ISI
+  residual contaminaría la medida. Segunda, su escenario es «oficina grande / bodega», no
+  «oficina típica»: menos representativo del despliegue habitual de Wi‑Fi 7.
 - **Model‑F** (1050 ns) **excede** el intervalo de guarda de 800 ns. Ahí sí aparecería ISI, y la
   degradación medida sería una mezcla de dos causas que no podríamos separar.
 
-**Model‑D es el punto justo, y la elección es deliberada, no cómoda.**
+**Model‑D es el punto justo: el perfil más selectivo entre los que dejan margen cómodo frente al
+prefijo cíclico, y además el del escenario de oficina típica.** La elección es deliberada.
 
 ### Matices honestos
 
@@ -136,7 +148,11 @@ sobre 400 realizaciones por distancia:
 | d (m) | K medido | Régimen |
 |---|---|---|
 | 5.0 – 9.9 | **+3 dB** | LOS (Rice) |
-| **10.0** en adelante | −25 a −30 dB | **NLOS (Rayleigh)** |
+| **10.0** en adelante | indistinguible de media nula | **NLOS (Rayleigh)** |
+
+> En NLOS el estimador devuelve −25 a −30 dB, pero **ese número no mide nada**: es el piso del
+> propio estimador, que vale −10·log₁₀(N) = −26 dB con N = 400 realizaciones. Hay que leerlo como
+> «la media compleja es indistinguible de cero», no como «K = −27 dB».
 
 Dos conclusiones. Primero, **la transición ocurre en `d ≥ dBP`**: MATLAB implementa el criterio
 del ejemplo, no la letra de la página de referencia. Segundo, el K medido por debajo del
@@ -238,9 +254,10 @@ El §5.4 pide **aplicar** el modelo y el §10 exige generar la forma de onda con
 | | |
 |---|---|
 | PSDU | 18 280 bits |
-| Forma de onda Tx | 7 922 muestras × **4** antenas |
+| Forma de onda Tx | 7 872 muestras × **4** antenas |
+| Con relleno de ceros (50 muestras) | 7 922 × 4 |
 | Señal recibida | 7 922 muestras × **2** antenas |
-| Duración del paquete | 99.0 µs |
+| Duración del PPDU | 98.4 µs (99.0 µs contando el relleno) |
 | Ganancias de trayecto | `[7922 × 35 × 4 × 2]` (muestras × trayectos × Tx × Rx) |
 
 La respuesta en frecuencia de `fig2` se sintetiza a partir de **esas** ganancias, no de una
@@ -266,24 +283,35 @@ Ejecutando `../matlab/test_channel.m` en MATLAB R2025b (WLAN Toolbox 25.2):
 > | CBW20 | **18** | 390 ns |
 > | CBW80 | **35** | 390 ns |
 >
-> Las 18 de la tabla del §2 son las del modelo TGn original, definido para 20 MHz. Para anchos
-> mayores el **TGax refina la rejilla de derivaciones** —a 80 MHz la separación entre
-> derivaciones contiguas es de 5 ns— para representar correctamente el canal con la resolución
-> temporal que da el mayor ancho de banda. El retardo máximo no cambia: sigue siendo 390 ns.
+> Las 18 de la tabla del §2 son las del modelo definido para **20 MHz**. Para anchos mayores la
+> rejilla se **subdivide**, duplicando el número de derivaciones sin cambiar el retardo máximo:
 >
-> Los retardos reales a CBW80 son `0, 5, 10, …, 95, 110, 115, 140, 145, …, 340, 345, 390` ns:
-> se ve la estructura de clusters, con derivaciones densas al principio y pares separados
-> después. **No** es un remuestreo al período de muestreo (12.5 ns a 80 MHz); de hecho 390 no
-> es múltiplo de 12.5.
+> | Ancho | Derivaciones | Separación mínima |
+> |---|---|---|
+> | CBW20 | 18 | 10 ns |
+> | CBW40 | 18 | 10 ns |
+> | CBW80 | **35** | **5 ns** |
+> | CBW160 | 69 | 2.5 ns |
+>
+> **La subdivisión arranca en 80 MHz, no antes:** CBW40 tiene la misma rejilla que CBW20.
+>
+> Cuidado con una imprecisión fácil: 5 ns es la separación **mínima**, no la separación entre
+> derivaciones contiguas. Los retardos reales a CBW80 son
+> `0, 5, 10, …, 95, 110, 115, 140, 145, …, 340, 345, 390` ns — se ve la estructura de clusters —
+> y las separaciones valen {5, 15, 25, 35, 45} ns.
+>
+> **No** es un remuestreo al período de muestreo (12.5 ns a 80 MHz): 390 no es múltiplo de 12.5,
+> y 35 derivaciones sobre esa rejilla darían 425 ns, no 390.
 
 ---
 
 ## 10. Preguntas anticipadas
 
 **¿Por qué Model‑D y no Model‑B, que es el del ejemplo oficial?**
-Model‑B es residencial y su retardo máximo de 80 ns produce un canal casi plano sobre 80 MHz.
-Queríamos un canal selectivo en frecuencia pero sin ISI, y Model‑D es el único perfil que
-cumple ambas cosas con un GI de 0.8 µs.
+Model‑B es residencial y tres veces menos selectivo (`B_c ≈ 13 MHz` frente a 4 MHz). Model‑D es
+«oficina típica» y da el canal más selectivo entre los que conservan margen cómodo frente al
+prefijo cíclico; en el §3 se descartan también Model‑C y Model‑E, este último por dejar solo
+70 ns de margen.
 
 **¿Por qué 11 m y no 10, que es el breakpoint?**
 Necesitamos régimen NLOS. Medimos dónde ocurre la transición (§4): es en `d ≥ 10 m`, así que

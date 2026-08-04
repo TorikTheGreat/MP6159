@@ -175,9 +175,11 @@ Comprobado ejecutando el mismo perfil a dos anchos de banda:
 | CBW20 | **18** | 390 ns |
 | CBW80 | **35** | 390 ns |
 
-Las 18 de la tabla son las del modelo **TGn original, definido para 20 MHz**. Para anchos
-mayores el **TGax refina la rejilla** —a 80 MHz la separación entre derivaciones contiguas es de
-**5 ns**— para aprovechar la mayor resolución temporal. El retardo máximo no cambia.
+Las 18 de la tabla son las del modelo definido para **20 MHz**. Para anchos mayores la rejilla
+se **subdivide**: separación mínima de 10 ns a CBW20 y CBW40, **5 ns** a CBW80 y 2.5 ns a CBW160,
+duplicando el número de derivaciones. **La subdivisión arranca en 80 MHz**: CBW40 tiene la misma
+rejilla que CBW20 (18 derivaciones). El retardo máximo no cambia. Ojo: 5 ns es la separación
+*mínima*, no la separación entre derivaciones contiguas (valen {5, 15, 25, 35, 45} ns).
 
 Retardos reales a CBW80, en ns:
 `0 5 10 … 95 · 110 115 · 140 145 · 170 175 · 200 205 · 240 245 · 290 295 · 340 345 · 390`

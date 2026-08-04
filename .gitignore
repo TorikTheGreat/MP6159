@@ -7,7 +7,7 @@ codegen/
 
 # Resultados de simulacion: pesados y regenerables.
 # Si un .mat es la evidencia final del video, forzarlo con: git add -f
-resultados/*.mat   # (el barrido es del rol C; aqui no se genera)
+resultados/*.mat
 
 # LaTeX
 *.aux

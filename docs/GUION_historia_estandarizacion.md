@@ -17,7 +17,7 @@
 | 5 · Cierre | 15 | 0:06 |
 | **Total** | **443** | **2:57** |
 
-> A 130 pal/min esto sale **3:24**. El ritmo de 150 no es opcional: hay que ensayarlo con cronómetro. **Si hay que recortar**, el bloque 4 completo sale sin romper nada (−32 s) y deja el segmento en 2:25, que es lo que presupuesta el plan §6.3.
+> A 130 pal/min esto sale **3:24**. El ritmo de 150 no es opcional: hay que ensayarlo con cronómetro. **Si hay que recortar**, el bloque 4 completo sale sin romper nada (−32 s) y deja el segmento en 2:25, cerca de los 2:00 que presupuesta el plan §6.3.
 
 ---
 

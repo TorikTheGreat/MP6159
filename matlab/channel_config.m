@@ -171,10 +171,6 @@ switch upper(perfil)
     case 'MODEL-D',                       dbp = 10;
     case 'MODEL-E',                       dbp = 20;
     case 'MODEL-F',                       dbp = 30;
-    case 'NONE',                          dbp = -Inf;  % sin desvanecimiento: no
-                                                       % hay regimen LOS/NLOS,
-                                                       % se reporta como NLOS
-                                                       % para no afirmar Rice
     otherwise
         error('channel_config:perfilDesconocido', ...
               'Perfil de retardo no reconocido: %s', perfil);

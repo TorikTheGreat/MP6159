@@ -8,15 +8,12 @@ integración) vive en el repositorio del equipo.
 
 ---
 
-## Mi entregable
-
+## Entregable rol B
 > **Enunciado, rol B:** *«Modelar un único escenario de canal representativo (alcance
 > acotado: sin barrido de sensibilidad). Resultado: modelo de canal parametrizado y
 > justificado con literatura o especificación del estándar.»*
 >
 > **Rúbrica:** «Justificación del modelo de canal» = 15 % de la rúbrica = **7.5 % de la nota final**.
-
-El código es corto. La mayor parte del peso evaluativo está en la **justificación citable**.
 
 | Archivo | Qué es |
 |---|---|
@@ -78,21 +75,24 @@ ch  = wlanTGaxChannel;
 2. **Coherencia con el prefijo cíclico.** El retardo máximo de Model‑D (**390 ns medidos**)
    queda holgadamente por debajo del intervalo de guarda de 800 ns: el canal es selectivo en
    frecuencia pero el CP absorbe la dispersión, **sin ISI**. Model‑F (1050 ns) sí lo excedería.
-3. **Régimen NLOS inequívoco.** El breakpoint de Model‑D es 10 m. La documentación define LOS
-   para `d < dBP` y NLOS para `d > dBP`, pero **no dice qué pasa en `d = dBP`**. Operar a 11 m
-   evita esa ambigüedad.
+3. **Régimen NLOS, verificado por medición.** El breakpoint de Model‑D es 10 m.
+   `verificacion_regimen.m` mide dónde ocurre la transición: es en **`d ≥ 10 m`**, y el factor K
+   por debajo del breakpoint sale **+3 dB**, coincidiendo con el valor documentado de Model‑D.
+   Operamos a 11 m, dentro de NLOS con margen.
 
 Fuentes citables: IEEE 802.11‑03/940r4 (TGn), 802.11‑14/0882r4 (TGax), 802.11‑19/0719r1 (TGbe).
 
 ---
 
-## Tres cosas que no son obvias
+## Cuatro cosas que no son obvias
 
-1. **`info(chan).AveragePathGains` ya viene en dB.** No aplicarle `10*log10()`.
-2. **No fijar `Seed` con `RandomStream='mt19937ar with seed'`** si el que valida va a llamar
+1. **`info()` devuelve 35 derivaciones, no las 18 de la tabla.** El número depende del ancho de
+   banda (CBW20 → 18, CBW80 → 35, ambas con 390 ns). Explicado en `docs/JUSTIFICACION_CANAL.md` §9.
+2. **`info(chan).AveragePathGains` ya viene en dB.** No aplicarle `10*log10()`.
+3. **No fijar `Seed` con `RandomStream='mt19937ar with seed'`** si el que valida va a llamar
    `reset()` por paquete: devolvería *la misma* realización siempre y la PER quedaría sin
    sentido estadístico. Se deja en `'Global stream'`, como el ejemplo oficial.
-3. **`LargeScaleFadingEffect` va en `'None'`.** `awgn(x,snr)` supone potencia de señal de
+4. **`LargeScaleFadingEffect` va en `'None'`.** `awgn(x,snr)` supone potencia de señal de
    0 dBW; con `'Pathloss'` activo la PER saldría 1 en todo el barrido.
 
 ## Contrato con el equipo
