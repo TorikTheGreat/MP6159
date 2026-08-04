@@ -6,9 +6,10 @@ function [chan, chanInfo] = channel_config(p, cfgEHT)
 %     chan     : System object wlanTGaxChannel, listo para llamar chan(x)
 %     chanInfo : info(chan) + campos anadidos a mano para trazabilidad
 %
-%   PROCEDENCIA. Derivado del bloque "Channel Configuration" (lineas 48-57)
-%   del ejemplo oficial de MathWorks EHTSUPacketErrorRateExample, copia
-%   intacta en matlab/baseline/. Diff completo en baseline/PROCEDENCIA.md.
+%   PROCEDENCIA. Derivado del bloque "Channel Configuration" (lineas 49-57)
+%   del ejemplo oficial de MathWorks EHTSUPacketErrorRateExample. Copia intacta
+%   en ../../ejemplo_mathworks/ (fuera del repo). Diff completo y errores que
+%   destapo: ../docs/PROCEDENCIA_canal.md.
 %
 %     ejemplo oficial (lin. 49-57)     este proyecto      razon
 %     ---------------------------------------------------------------------
@@ -16,20 +17,28 @@ function [chan, chanInfo] = channel_config(p, cfgEHT)
 %                                                         residencial: 50 ns
 %                                                         de RMS delay spread,
 %                                                         18 taps, 3 clusters
-%     TransmitReceiveDistance 5 m   -> 11 m               el breakpoint de
-%                                                         Model-D es 10 m; a
-%                                                         11 m el regimen NLOS
-%                                                         es inequivoco
+%     TransmitReceiveDistance 5 m   -> 11 m               el ejemplo situa la
+%                                                         estacion en el
+%                                                         breakpoint de Model-B
+%                                                         (5 m, NLOS); nosotros
+%                                                         la situamos por encima
+%                                                         del de Model-D (10 m).
+%                                                         Verificado en
+%                                                         verificacion_regimen.m
 %     ChannelBandwidth 'CBW20'      -> 'CBW80'            decision del rol A
 %     (no fijadas)                  -> CarrierFrequency   5.29 GHz: centro
 %                                                         legal de un canal de
 %                                                         80 MHz (el defecto
 %                                                         5.25 GHz es centro
 %                                                         de uno de 160 MHz)
-%     (no fijadas)                  -> EnvironmentalSpeed explicitas para poder
-%                                      FluorescentEffect  justificarlas en el
-%                                                         video; ambas iguales
-%                                                         al valor por defecto
+%     (no fijada)                   -> EnvironmentalSpeed explicita para poder
+%                                                         justificarla en el
+%                                                         video; = valor defecto
+%     (no fijada)                   -> FluorescentEffect  fijada SOLO si el
+%                                                         perfil es Model-D o E,
+%                                                         que son los unicos
+%                                                         donde la propiedad
+%                                                         aplica; = valor defecto
 %
 %   Todo lo demas se deja EXACTAMENTE como el ejemplo, incluidos los valores
 %   por defecto de NormalizeChannelOutputs y NormalizePathGains: el ejemplo
@@ -95,7 +104,8 @@ end
 % devuelve LA MISMA realizacion en cada paquete, lo que invalida la PER.
 % El ejemplo oficial obtiene reproducibilidad sin tocar el objeto: fija el
 % flujo global por punto de SNR con RandStream('combRecursive',Seed=99) y un
-% Substream distinto por iteracion. Replicar ese patron en run_per_sweep.m.
+% Substream distinto por iteracion. Aqui basta rng() global porque no hay
+% barrido; el rol C deberia replicar el patron de substreams en run_per_sweep.m.
 
 % --- Trazabilidad para el video y para el rol C -----------------------------
 ci = info(chan);   % campos: ChannelFilterDelay, ChannelFilterCoefficients,
@@ -110,7 +120,9 @@ chanInfo.rmsDelaySpread_ns = localRMSDelaySpread(ci);
 chanInfo.guardInterval_ns  = cfgEHT.GuardInterval*1000;
 chanInfo.breakpoint_m      = localBreakpoint(p.delayProfile);
 chanInfo.sinISI            = chanInfo.maxDelay_ns < chanInfo.guardInterval_ns;
-chanInfo.esNLOS            = p.txRxDistance > chanInfo.breakpoint_m;
+% Verificado empiricamente con verificacion_regimen.m: la transicion ocurre en
+% d >= dBP (no d > dBP, como sugiere la letra de la pagina de referencia).
+chanInfo.esNLOS            = p.txRxDistance >= chanInfo.breakpoint_m;
 
 if chanInfo.sinISI
     veredictoISI = sprintf('retardo max %.0f ns < GI %.0f ns: sin ISI', ...
@@ -126,10 +138,10 @@ else
 end
 
 if chanInfo.esNLOS
-    veredictoLOS = sprintf('%g m > breakpoint %g m => NLOS', ...
+    veredictoLOS = sprintf('%g m >= breakpoint %g m => NLOS', ...
         p.txRxDistance, chanInfo.breakpoint_m);
 else
-    veredictoLOS = sprintf('%g m <= breakpoint %g m => LOS (primera derivacion Rice)', ...
+    veredictoLOS = sprintf('%g m < breakpoint %g m => LOS (primera derivacion Rice)', ...
         p.txRxDistance, chanInfo.breakpoint_m);
 end
 
@@ -159,7 +171,10 @@ switch upper(perfil)
     case 'MODEL-D',                       dbp = 10;
     case 'MODEL-E',                       dbp = 20;
     case 'MODEL-F',                       dbp = 30;
-    case 'NONE',                          dbp = NaN;   % sin desvanecimiento
+    case 'NONE',                          dbp = -Inf;  % sin desvanecimiento: no
+                                                       % hay regimen LOS/NLOS,
+                                                       % se reporta como NLOS
+                                                       % para no afirmar Rice
     otherwise
         error('channel_config:perfilDesconocido', ...
               'Perfil de retardo no reconocido: %s', perfil);

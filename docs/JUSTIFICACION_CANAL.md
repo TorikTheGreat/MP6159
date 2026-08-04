@@ -12,8 +12,9 @@
 >
 > **Rúbrica:** «Justificación del modelo de canal» = 15 % de la rúbrica = **7.5 % de la nota final**.
 
-Este documento es el entregable del rol B. El código (`../matlab/channel_config.m`) son unas
-30 líneas; lo que se califica es lo que sigue.
+Este documento es el entregable del rol B. El código es corto; el peso de la evaluación está
+repartido entre la **implementación técnica correcta** (30 % de la rúbrica, compartido con el
+resto del equipo) y **esta justificación** (15 %).
 
 ---
 
@@ -83,14 +84,20 @@ Con τ_rms = 49.4 ns (medido), el ancho de banda de coherencia ronda
 
 $$B_c \approx \frac{1}{5\,\tau_{rms}} \approx 4\ \text{MHz}$$
 
-Sobre los 80 MHz del canal eso son unos **20 desvanecimientos independientes a lo ancho de la
-banda**. Es exactamente lo que muestra la figura `fig2_respuesta_frecuencia.png`. El canal es
-genuinamente selectivo; no estamos simulando un caso trivial.
+Sobre los 80 MHz del canal eso da del orden de **una veintena de desvanecimientos independientes
+a lo ancho de la banda**. La figura `fig2_respuesta_frecuencia.png` muestra una realización
+concreta, donde se cuentan unos diez o doce nulos profundos — el número exacto en una sola
+realización es una variable aleatoria, y `80/B_c` es un promedio, no una predicción. Lo que la
+figura sí demuestra sin ambigüedad es que **el canal varía decenas de dB dentro del mismo
+canal de 80 MHz**: es genuinamente selectivo en frecuencia, no un caso trivial.
 
 ### Por qué no los vecinos
 
-- **Model‑B** (80 ns) es demasiado benigno: apenas hay selectividad, el enlace se parece a AWGN
-  y el ejercicio pierde interés. *(Es, sin embargo, el que usa el ejemplo oficial — ver §7.)*
+- **Model‑B** (τ_rms 15 ns, retardo máx. 80 ns) también es selectivo, pero **tres veces menos**:
+  con la misma fórmula, `B_c ≈ 1/(5·15 ns) ≈ 13 MHz`, es decir unos 6 desvanecimientos sobre
+  80 MHz frente a la veintena de Model‑D. Es un escenario residencial y produce una degradación
+  más suave; sirve para un ejemplo introductorio, no para exhibir el efecto del multitrayecto.
+  *(Es, sin embargo, el que usa el ejemplo oficial — ver §7.)*
 - **Model‑F** (1050 ns) **excede** el intervalo de guarda de 800 ns. Ahí sí aparecería ISI, y la
   degradación medida sería una mezcla de dos causas que no podríamos separar.
 
@@ -108,19 +115,49 @@ genuinamente selectivo; no estamos simulando un caso trivial.
 
 ## 4. Tercer argumento — régimen NLOS inequívoco
 
-La distancia de breakpoint de Model‑D es **10 m**. La documentación de `wlanTGaxChannel` dice
-que para `d < dBP` aplican los parámetros **LOS** y para `d > dBP` los **NLOS** — pero **no
-define qué ocurre exactamente en `d = dBP`**.
+El canal debe estar en régimen **NLOS**, que es el caso realista de oficina (el AP en el
+pasillo, la estación detrás de una pared) y el que produce la selectividad en frecuencia que
+queremos ilustrar. En LOS la primera derivación lleva componente especular (Rice) y el canal es
+notablemente menos selectivo.
 
-Por eso operamos a **11 m**, apenas por encima: caemos sin ambigüedad en régimen NLOS, que es
-el caso realista de oficina (el AP en el pasillo, la estación detrás de una pared) y el que
-produce la selectividad en frecuencia que queremos ilustrar. A 10 m exactos el estado LOS/NLOS
-sería ambiguo según la documentación, y si se resolviera como LOS tendríamos el punto *menos*
-selectivo de Model‑D, justo lo contrario de lo que buscamos.
+La distancia de breakpoint de Model‑D es **10 m**. Aquí hay una discrepancia entre fuentes que
+conviene conocer:
+
+- La **página de referencia** de `wlanTGaxChannel` dice que los parámetros LOS aplican para
+  `d < dBP` y los NLOS para `d > dBP`, sin pronunciarse sobre `d = dBP`.
+- El **ejemplo oficial** sí se pronuncia: *«Model‑B is considered NLOS when the distance […] is
+  greater than **or equal to** 5 meters»*, y usa `TransmitReceiveDistance = 5`, exactamente el
+  breakpoint, rotulado `% Distance in meters for NLOS`.
+
+**Lo resolvimos midiéndolo** (`../matlab/verificacion_regimen.m`). Estimando el factor de Rice
+como el cociente entre el cuadrado de la media compleja de la primera derivación y su varianza,
+sobre 400 realizaciones por distancia:
+
+| d (m) | K medido | Régimen |
+|---|---|---|
+| 5.0 – 9.9 | **+3 dB** | LOS (Rice) |
+| **10.0** en adelante | −25 a −30 dB | **NLOS (Rayleigh)** |
+
+Dos conclusiones. Primero, **la transición ocurre en `d ≥ dBP`**: MATLAB implementa el criterio
+del ejemplo, no la letra de la página de referencia. Segundo, el K medido por debajo del
+breakpoint es **+3 dB, que coincide con el valor documentado de Model‑D** — una verificación
+independiente de que el modelo hace lo que la tabla del §2 promete.
+
+Operamos a **11 m**: dentro del régimen NLOS con margen, y una distancia AP–estación realista
+en una oficina. A 10 m ya sería NLOS; los 11 m evitan además depender de cómo se resuelva el
+caso frontera si una versión futura cambiara el criterio.
 
 ---
 
 ## 5. Por qué el *path loss* va desactivado
+
+> **Aclaración imprescindible, porque se presta a malentendido.** `LargeScaleFadingEffect`
+> controla **solo el desvanecimiento de gran escala**: pérdida de trayecto y sombreado. Ponerlo
+> en `'None'` **no** desactiva el desvanecimiento del canal. El desvanecimiento de pequeña
+> escala —Rayleigh en NLOS, Rice en LOS, derivación por derivación— es el modelo mismo y está
+> siempre activo: es lo que produce la respuesta en frecuencia de `fig2` y lo que hace que cada
+> `reset()` entregue una realización distinta. El enunciado (§5.4) pide «multipath y
+> desvanecimiento»: ambos están, y el desvanecimiento es el de pequeña escala.
 
 `LargeScaleFadingEffect = 'None'`. **No es una simplificación cómoda: activarlo sería un error.**
 
@@ -166,7 +203,9 @@ El enunciado obliga a partir de un ejemplo oficial de MathWorks. El nuestro es
 | `TransmitReceiveDistance` | 5 m | 11 m | desviación justificada (§4) |
 | `ChannelBandwidth` | `'CBW20'` | `'CBW80'` | decisión del rol A |
 | `LargeScaleFadingEffect` | `'None'` | `'None'` | **idéntico** (§5) |
-| `NumTransmitAntennas` | derivado de `cfgEHT` | ídem | **adoptado del ejemplo** |
+| `NumReceiveAntennas` | `numRx` (=2) | `p.numRxAntennas` (=2) | equivalente |
+| `SampleRate` | `wlanSampleRate(chanBW)` | `wlanSampleRate(cfgEHT)` | equivalente; el objeto contempla sobremuestreo |
+| `NumTransmitAntennas` | derivado de `cfgEHT` (=2) | ídem (=4) | patrón adoptado, valor distinto |
 | `CarrierFrequency`, `EnvironmentalSpeed`, `FluorescentEffect` | no fijadas | explícitas | añadidos justificados |
 
 Diff completo y errores que destapó: `PROCEDENCIA_canal.md`.
@@ -191,6 +230,24 @@ métrica clave del equipo.
 
 ## 9. Verificación numérica
 
+### El canal se aplica a una forma de onda 802.11be real
+
+El §5.4 pide **aplicar** el modelo y el §10 exige generar la forma de onda con el toolbox.
+`test_channel.m` produce un PPDU con `wlanWaveformGenerator` y lo pasa por el canal:
+
+| | |
+|---|---|
+| PSDU | 18 280 bits |
+| Forma de onda Tx | 7 922 muestras × **4** antenas |
+| Señal recibida | 7 922 muestras × **2** antenas |
+| Duración del paquete | 99.0 µs |
+| Ganancias de trayecto | `[7922 × 35 × 4 × 2]` (muestras × trayectos × Tx × Rx) |
+
+La respuesta en frecuencia de `fig2` se sintetiza a partir de **esas** ganancias, no de una
+señal de sondeo fabricada aparte.
+
+### Parámetros del canal
+
 Ejecutando `../matlab/test_channel.m` en MATLAB R2025b (WLAN Toolbox 25.2):
 
 | Magnitud | Medido | Documentado | |
@@ -201,11 +258,23 @@ Ejecutando `../matlab/test_channel.m` en MATLAB R2025b (WLAN Toolbox 25.2):
 | Retardo del filtro de canal | 7 muestras | — | relevante para la sincronización |
 | Derivaciones de `info()` | 35 | 18 | ⚠️ ver nota |
 
-> **Nota — 35 vs. 18 derivaciones.** No es un error. Las **18** son las derivaciones del
-> *modelo* (ecos físicos en 3 clusters, con retardos en el continuo). Las **35** son las de la
-> *línea de retardos muestreada* que devuelve `info()`, discretizada a la tasa de muestreo: a
-> 80 MHz el período es 12.5 ns y 390 / 12.5 ≈ 31 posiciones en la rejilla, más el filtro de
-> interpolación. **El número depende del ancho de banda.**
+> **Nota — 35 vs. 18 derivaciones.** No es un error: **el número de derivaciones depende del
+> ancho de banda**, comprobado ejecutando el mismo perfil a dos anchos:
+>
+> | Ancho de banda | Derivaciones | Retardo máximo |
+> |---|---|---|
+> | CBW20 | **18** | 390 ns |
+> | CBW80 | **35** | 390 ns |
+>
+> Las 18 de la tabla del §2 son las del modelo TGn original, definido para 20 MHz. Para anchos
+> mayores el **TGax refina la rejilla de derivaciones** —a 80 MHz la separación entre
+> derivaciones contiguas es de 5 ns— para representar correctamente el canal con la resolución
+> temporal que da el mayor ancho de banda. El retardo máximo no cambia: sigue siendo 390 ns.
+>
+> Los retardos reales a CBW80 son `0, 5, 10, …, 95, 110, 115, 140, 145, …, 340, 345, 390` ns:
+> se ve la estructura de clusters, con derivaciones densas al principio y pares separados
+> después. **No** es un remuestreo al período de muestreo (12.5 ns a 80 MHz); de hecho 390 no
+> es múltiplo de 12.5.
 
 ---
 
@@ -217,8 +286,9 @@ Queríamos un canal selectivo en frecuencia pero sin ISI, y Model‑D es el úni
 cumple ambas cosas con un GI de 0.8 µs.
 
 **¿Por qué 11 m y no 10, que es el breakpoint?**
-Porque la documentación define LOS para `d < dBP` y NLOS para `d > dBP`, pero no dice qué pasa
-en `d = dBP`. A 11 m el régimen es inequívoco.
+Necesitamos régimen NLOS. Medimos dónde ocurre la transición (§4): es en `d ≥ 10 m`, así que
+10 m ya bastaría. Elegimos 11 m por margen y porque es una distancia AP–estación realista en
+oficina. De paso la medición confirmó el factor K de 3 dB documentado para Model‑D.
 
 **¿Qué pasaría si el canal empeorara?**
 Con Model‑F la dispersión de retardo se triplica y el retardo máximo (1050 ns) supera el
@@ -235,6 +305,13 @@ Ver §5: es incompatible con `awgn(x,snr)`, que supone potencia de señal de 0 d
 ---
 
 ## 11. Referencias
+
+> **Qué respalda cada una:** [1] los seis perfiles de retardo, sus distancias de breakpoint y el
+> modelo de pérdida de trayecto (§2 y §5). [2] la extensión del modelo a anchos de banda
+> mayores, de donde sale la rejilla refinada de 35 derivaciones a 80 MHz (§9). [3] la adopción
+> de los modelos TGn/TGac/TGax por parte del TGbe, que es lo que legitima usar `wlanTGaxChannel`
+> para 802.11be (§10). Las secciones exactas están pendientes de cotejo directo con los
+> documentos; ver la advertencia del §5.
 
 1. V. Erceg, L. Schumacher, P. Kyritsi *et al.*, «TGn Channel Models», versión 4,
    IEEE 802.11‑03/940r4, mayo 2004.

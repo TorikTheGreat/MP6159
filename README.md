@@ -16,18 +16,20 @@ integración) vive en el repositorio del equipo.
 >
 > **Rúbrica:** «Justificación del modelo de canal» = 15 % de la rúbrica = **7.5 % de la nota final**.
 
-El código son ~30 líneas. **Lo que se califica es la justificación citable**, no el código.
+El código es corto. La mayor parte del peso evaluativo está en la **justificación citable**.
 
 | Archivo | Qué es |
 |---|---|
 | `matlab/channel_config.m` | **El entregable.** Firma congelada por contrato con el equipo. |
-| `matlab/test_channel.m` | Arnés propio: ejercita el canal sin depender de archivos de otros roles. |
+| `matlab/test_channel.m` | Arnés propio: genera un PPDU real, lo pasa por el canal y produce las figuras. |
+| `matlab/verificacion_regimen.m` | Caracterización del modelo: mide dónde ocurre la transición LOS→NLOS. |
 | `figuras/` | Las tres figuras del segmento de canal. |
 | **`docs/JUSTIFICACION_CANAL.md`** | **El entregable que se califica (15 %).** Los tres argumentos, verificación y preguntas anticipadas. |
 | `docs/PROCEDENCIA_canal.md` | Diff contra el ejemplo oficial de MathWorks + valores medidos. |
 | `docs/GUION_historia_estandarizacion.md` | Guion del video (2:57). |
 | `docs/INVESTIGACION_historia_estandarizacion.md` | Dossier de investigación. |
 | `docs/slides/` | Láminas Beamer del segmento. |
+| `docs/enunciado.pdf` | El enunciado del proyecto, como referencia. |
 
 ---
 
@@ -35,7 +37,8 @@ El código son ~30 líneas. **Lo que se califica es la justificación citable**,
 
 ```matlab
 cd matlab
-test_channel
+test_channel            % canal + PPDU real + las tres figuras
+verificacion_regimen    % (opcional) mide la transicion LOS -> NLOS
 ```
 
 Salida verificada en MATLAB R2025b (WLAN Toolbox 25.2):
@@ -46,13 +49,21 @@ Salida verificada en MATLAB R2025b (WLAN Toolbox 25.2):
   Derivaciones      : 35
   Retardo maximo    : 390.0 ns
   RMS delay spread  : 49.4 ns
+  Retardo del filtro: 7 muestras
   OK: retardo maximo (390 ns) < GI (800 ns) => sin ISI
+
+=== Canal aplicado a una forma de onda 802.11be ===
+  Forma de onda Tx  : 7922 muestras x 4 antenas
+  Señal recibida    : 7922 muestras x 2 antenas
+  Duracion          : 99.0 us
 ```
 
-Requiere MATLAB **R2023a o posterior** con **WLAN Toolbox**. Comprobación:
+Requiere MATLAB **R2023a o posterior** con **WLAN Toolbox** (verificado en R2025b).
+Comprobación — `wlanEHTMUConfig` es la que exige soporte de 802.11be:
 
 ```matlab
-ch = wlanTGaxChannel;   % si esto instancia, la licencia está
+cfg = wlanEHTMUConfig('CBW80');   % si instancia, hay licencia y soporte EHT
+ch  = wlanTGaxChannel;
 ```
 
 ---

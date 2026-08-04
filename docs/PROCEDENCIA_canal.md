@@ -1,7 +1,7 @@
 # Procedencia — diff contra el ejemplo oficial de MathWorks
 
-El enunciado (§10) obliga a **partir de un ejemplo oficial de MathWorks antes de
-modificar parámetros propios**. Este documento demuestra esa procedencia con el diff
+El enunciado obliga a **partir de un ejemplo oficial de MathWorks antes de modificar
+parámetros propios** (§2 y §11; el §10 añade la exigencia de fuente citable para el canal). Este documento demuestra esa procedencia con el diff
 real, no con una afirmación.
 
 ## El ejemplo
@@ -21,7 +21,10 @@ real, no con una afirmación.
 
 ---
 
-## Configuración del ejemplo (verbatim, líneas 32–57)
+## Configuración del ejemplo (extracto de las líneas 32–57)
+
+> Extracto, no transcripción: se omiten comentarios y líneas intermedias.
+> El archivo íntegro está en `../../ejemplo_mathworks/EHTSUPacketErrorRateExample.m`.
 
 ```matlab
 chanBW = 'CBW20';
@@ -30,7 +33,7 @@ cfgEHT.User{1}.APEPLength = 1e3;
 numTx = 2;
 numRx = 2;
 cfgEHT.NumTransmitAntennas = numTx;
-cfgEHT.User{1}.NumSpaceTimeStreams = numTx;   % NSTS = numTx  =>  SpatialMapping "direct"
+cfgEHT.User{1}.NumSpaceTimeStreams = numTx;   % Number of space-time streams
 mcs = 13;
 
 tgaxChannel = wlanTGaxChannel;
@@ -53,7 +56,7 @@ tgaxChannel.SampleRate = fs;
 | `DelayProfile` | `'Model-B'` | `'Model-D'` | **desviación justificada** |
 | `TransmitReceiveDistance` | `5` | `11` | **desviación justificada** |
 | `ChannelBandwidth` | `'CBW20'` | `'CBW80'` | desviación (decisión del rol A) |
-| `NumTransmitAntennas` | `cfgEHT.NumTransmitAntennas` | ídem | **adoptado del ejemplo** |
+| `NumTransmitAntennas` | `cfgEHT.NumTransmitAntennas` | ídem (pero el valor es 4, no 2) | patrón adoptado; valor distinto |
 | `NumReceiveAntennas` | `numRx` | `p.numRxAntennas` | equivalente |
 | `LargeScaleFadingEffect` | `'None'` | `'None'` | idéntico |
 | `SampleRate` | `wlanSampleRate(chanBW)` | `wlanSampleRate(cfgEHT)` | equivalente (misma tasa) |
@@ -92,8 +95,9 @@ El ejemplo añade cola al paquete antes de pasarlo por el canal (línea 159):
 txPad = [tx; zeros(50,cfgEHT.NumTransmitAntennas)];
 ```
 
-Sin eso, el retardo del filtro de canal trunca el final del paquete. **Añadido** a
-`main_wifi7_link.m`; hay que replicarlo en `run_per_sweep.m`.
+Sin eso, el retardo del filtro de canal trunca el final del paquete. **Aplicado** en
+`../matlab/test_channel.m`; el equipo debe replicarlo en su `main_wifi7_link.m` y en
+`run_per_sweep.m`.
 
 ### 3. El patrón de aleatoriedad del ejemplo es mejor que el del plan
 
@@ -107,8 +111,12 @@ RandStream.setGlobalStream(stream);
 
 Reproducible **y** compatible con `parfor`, porque cada punto de SNR tiene su propio
 substream independiente. El objeto de canal se queda en `'Global stream'` y `reset()`
-por paquete saca realización nueva — confirma la corrección del plan de no usar
-`'mt19937ar with seed'`. **Adoptar este patrón en `run_per_sweep.m`.**
+por paquete saca realización nueva — confirma la corrección de no usar
+`'mt19937ar with seed'`.
+
+> **Estado:** este repo (rol B) usa `rng(p.rngSeed)` global, que basta para un solo
+> escenario sin barrido. El patrón de substreams es una **recomendación para el rol C**,
+> que sí barre SNR; no está aplicado aquí porque aquí no hay barrido.
 
 ---
 
@@ -146,7 +154,7 @@ lanzar el barrido completo.**
 
 ## Valores medidos (MATLAB R2025b, WLAN Toolbox 25.2)
 
-Ejecutando `matlab/test_channel.m`:
+Ejecutando `../matlab/test_channel.m`:
 
 | Magnitud | Medido | Documentado | |
 |---|---|---|---|
@@ -158,16 +166,21 @@ Ejecutando `matlab/test_channel.m`:
 
 **El argumento del prefijo cíclico queda verificado numéricamente:** 390 ns < 800 ns.
 
-### ⚠️ Por qué `info()` dice 35 derivaciones y la documentación dice 18
+### Por qué `info()` dice 35 derivaciones y la documentación dice 18
 
-No es un error. Son dos cosas distintas y conviene tener la respuesta lista:
+Comprobado ejecutando el mismo perfil a dos anchos de banda:
 
-- **18** son las derivaciones del *modelo* TGn/TGax — los ecos físicos agrupados en 3 clusters,
-  con retardos arbitrarios en el continuo.
-- **35** son las derivaciones de la *línea de retardos muestreada* que devuelve `info()`, ya
-  discretizada a la tasa de muestreo. A 80 MHz el período de muestreo es 12.5 ns, y
-  390 / 12.5 ≈ 31 posiciones en la rejilla; el filtro de interpolación añade unas pocas más.
+| Ancho de banda | Derivaciones | Retardo máximo |
+|---|---|---|
+| CBW20 | **18** | 390 ns |
+| CBW80 | **35** | 390 ns |
 
-Es decir: el número que devuelve `info()` **depende del ancho de banda**. Con CBW20 (20 MHz,
-período 50 ns) saldrían muchas menos. Si alguien pregunta en el video por qué la figura del PDP
-tiene más puntos que las 18 de la tabla, esa es la respuesta.
+Las 18 de la tabla son las del modelo **TGn original, definido para 20 MHz**. Para anchos
+mayores el **TGax refina la rejilla** —a 80 MHz la separación entre derivaciones contiguas es de
+**5 ns**— para aprovechar la mayor resolución temporal. El retardo máximo no cambia.
+
+Retardos reales a CBW80, en ns:
+`0 5 10 … 95 · 110 115 · 140 145 · 170 175 · 200 205 · 240 245 · 290 295 · 340 345 · 390`
+
+**No** es un remuestreo al período de muestreo (12.5 ns a 80 MHz): 390 no es múltiplo de 12.5, y
+35 derivaciones sobre esa rejilla darían un último retardo de 425 ns, no 390.
