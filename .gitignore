@@ -1,0 +1,27 @@
+# MATLAB
+*.asv
+*.m~
+*.mex*
+slprj/
+codegen/
+
+# Resultados de simulacion: pesados y regenerables.
+# Si un .mat es la evidencia final del video, forzarlo con: git add -f
+resultados/*.mat
+
+# LaTeX
+*.aux
+*.log
+*.nav
+*.out
+*.snm
+*.toc
+*.synctex.gz
+*.fdb_latexmk
+*.fls
+# El PDF de las laminas SI se versiona (es entregable)
+!docs/slides/*.pdf
+
+# SO
+.DS_Store
+Thumbs.db

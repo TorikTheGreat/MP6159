@@ -1,0 +1,304 @@
+% =====================================================================
+%  MP-6159 Interfaces de Comunicaciones - TEC
+%  Proyecto final, Equipo 4: Wi-Fi / IEEE 802.11be
+%  Segmento: "Historia y estandarizacion" (Marco) - 3 min
+%  Guion: GUION_historia_estandarizacion.md
+%  Compilar:  pdflatex slides_historia.tex   (dos veces)
+% =====================================================================
+\documentclass[aspectratio=169,10pt]{beamer}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish,es-noshorthands]{babel}
+\usepackage{lmodern}
+\usepackage{booktabs}
+\usepackage{tikz}
+\usetikzlibrary{positioning}
+
+% ---------- Estilo sobrio, sin barras de navegacion ----------
+\usetheme{default}
+\usecolortheme{default}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{itemize items}[circle]
+
+\definecolor{tecazul}{RGB}{27,54,93}
+\definecolor{tecgris}{RGB}{110,110,110}
+\definecolor{acento}{RGB}{192,84,32}
+
+\setbeamercolor{structure}{fg=tecazul}
+\setbeamercolor{frametitle}{fg=tecazul}
+\setbeamercolor{title}{fg=tecazul}
+\setbeamerfont{frametitle}{size=\large,series=\bfseries}
+\setbeamertemplate{frametitle}{%
+  \vspace{0.6em}\insertframetitle\par
+  {\color{tecazul}\rule{\textwidth}{0.8pt}}\vspace{-0.4em}}
+
+% Pie de fuente reutilizable
+\newcommand{\fuente}[1]{%
+  \vfill{\scriptsize\color{tecgris} Fuente: #1\par}}
+\newcommand{\destaca}[1]{{\color{acento}\textbf{#1}}}
+% Cita numerada estilo IEEE, para los pies de fuente
+\newcommand{\cita}[1]{{\color{tecazul}[#1]}}
+
+% Bibliografia: numeros en vez de los iconos por defecto de beamer
+\setbeamertemplate{bibliography item}[text]
+\setbeamercolor{bibliography item}{fg=tecazul}
+\setbeamercolor{bibliography entry author}{fg=black}
+\setbeamercolor{bibliography entry title}{fg=black}
+\setbeamercolor{bibliography entry note}{fg=tecgris}
+
+\title{\textbf{Wi-Fi 7 --- IEEE 802.11be}}
+\subtitle{Historia y estandarización}
+\author{Marco Zolla \quad\textbar\quad Equipo 4}
+\institute{\small MP-6159 Interfaces de Comunicaciones\\Maestría en Electrónica --- Tecnológico de Costa Rica}
+\date{Agosto 2026}
+
+\begin{document}
+
+% =====================================================================
+% LAMINA 1 - Portada  [0:00-0:16]
+% =====================================================================
+\begin{frame}[plain]
+  \titlepage
+  \vspace{-1.2em}
+  \begin{center}
+    \footnotesize\color{tecgris}
+    Historia y estandarización \;$\cdot$\; Arquitectura \;$\cdot$\; Formato de trama \;$\cdot$\;
+    Aplicaciones \;$\cdot$\; Tendencias \;$\cdot$\; Simulación \;$\cdot$\; Preguntas
+  \end{center}
+\end{frame}
+
+% =====================================================================
+% LAMINA 2 - Origen  [0:16-1:02]
+% =====================================================================
+\begin{frame}{El origen: una decisión regulatoria, no técnica}
+  \vspace{0.4em}
+  \begin{center}
+  \begin{tikzpicture}[x=1cm,y=1cm]
+    % eje
+    \draw[very thick,tecazul,->] (0,0) -- (13.0,0);
+    \foreach \x in {1.5,5.3,8.7,11.7}{\draw[very thick,tecazul] (\x,-0.12) -- (\x,0.12);}
+
+    % 1985
+    \node[anchor=south] at (1.5,0.18) {\footnotesize\textbf{1985}};
+    \node[align=center,anchor=north,text width=2.9cm] at (1.5,-0.32)
+      {\scriptsize \destaca{9 de mayo}\\ La FCC abre las bandas\\ ISM al uso \textbf{sin licencia}};
+
+    % 1990
+    \node[anchor=south] at (5.3,0.18) {\footnotesize\textbf{1990}};
+    \node[align=center,anchor=north,text width=2.9cm] at (5.3,-0.32)
+      {\scriptsize Se forma el grupo\\ de trabajo \textbf{IEEE 802.11}\\ (preside Vic Hayes)};
+
+    % 1997
+    \node[anchor=south] at (8.7,0.18) {\footnotesize\textbf{1997}};
+    \node[align=center,anchor=north,text width=2.9cm] at (8.7,-0.32)
+      {\scriptsize \textbf{802.11-1997}\\ hasta 2 Mbit/s\\ \textit{fracaso comercial}};
+
+    % 1999
+    \node[anchor=south] at (11.7,0.18) {\footnotesize\textbf{1999}};
+    \node[align=center,anchor=north,text width=2.9cm] at (11.7,-0.32)
+      {\scriptsize \textbf{802.11a} --- 54 Mbit/s\\ \textbf{802.11b} --- 11 Mbit/s\\ \destaca{gana la lenta}};
+  \end{tikzpicture}
+  \end{center}
+
+  \vspace{1.5cm}
+  \begin{center}
+    \small\itshape Siete años entre el grupo de trabajo y el primer estándar.
+  \end{center}
+
+  \fuente{FCC, Docket 81-413 \cita{1} \textbullet\ IEEE Std 802.11-1997 \cita{2} \textbullet\
+          802.11a/b-1999 \cita{3,4} \textbullet\ Vic Hayes, ETHW \cita{5}}
+\end{frame}
+
+% =====================================================================
+% LAMINA 3 - Evolucion  [1:02-1:46]
+% =====================================================================
+\begin{frame}{Evolución de versiones: dos etapas, dos objetivos}
+  \vspace{0.2em}
+  \centering\small
+  \begin{tabular}{@{}llll@{}}
+    \toprule
+    \textbf{Enmienda} & \textbf{Año} & \textbf{Innovación} & \textbf{Nombre comercial}\\
+    \midrule
+    \multicolumn{4}{@{}l}{\color{tecazul}\textbf{Etapa 1 --- velocidad pico}}\\
+    802.11a / b & 1999 & OFDM en 5\,GHz / CCK en 2.4\,GHz & ---\\
+    802.11g     & 2003 & OFDM llega a 2.4\,GHz            & ---\\
+    \textbf{802.11n} & \textbf{2009} & \destaca{MIMO} --- $\times$10 en tasa & Wi-Fi 4\\
+    802.11ac    & 2013 & 160\,MHz, 256-QAM, MU-MIMO       & Wi-Fi 5\\
+    \addlinespace
+    \multicolumn{4}{@{}l}{\color{tecazul}\textbf{Etapa 2 --- eficiencia en escenarios densos}}\\
+    802.11ax    & 2021 & \destaca{OFDMA}, 1024-QAM, 6\,GHz & Wi-Fi 6 / 6E\\
+    \textbf{802.11be} & \textbf{2025} & 320\,MHz, 4096-QAM, \destaca{Multi-Link} & \textbf{Wi-Fi 7}\\
+    \bottomrule
+  \end{tabular}
+
+  \vspace{1.1em}
+  \begin{block}{}
+    \centering
+    Sin los \textbf{1200 MHz} de 6 GHz que la FCC abrió en \textbf{2020},\\
+    los canales de \textbf{320 MHz} de Wi-Fi 7 no existirían.
+  \end{block}
+
+  \fuente{IEEE Std 802.11g/n/ac/ax \cita{6--9} \textbullet\ IEEE Std 802.11be-2024 \cita{10}
+          \textbullet\ FCC, ET Docket 18-295 \cita{11} \textbullet\ Wi-Fi Alliance \cita{12}}
+\end{frame}
+
+% =====================================================================
+% LAMINA 4 - Organismo responsable  [1:46-2:19]
+% =====================================================================
+\begin{frame}{¿Quién es el responsable? Dos organizaciones distintas}
+  \vspace{0.5em}
+  \centering
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.46\textwidth}
+      \begin{block}{\textbf{IEEE}}
+        \small
+        \begin{itemize}
+          \item \textbf{Escribe la norma}
+          \item Se vota \textbf{como individuo}, no como empresa
+          \item Nomenclatura: \texttt{802.11be}
+          \item Termina \textbf{años después} del producto
+        \end{itemize}
+      \end{block}
+    \end{column}
+    \begin{column}{0.46\textwidth}
+      \begin{block}{\textbf{Wi-Fi Alliance}}
+        \small
+        \begin{itemize}
+          \item \textbf{No escribe ninguna norma}
+          \item Consorcio industrial de empresas
+          \item \textbf{Certifica interoperabilidad}
+          \item Nomenclatura: \textbf{«Wi-Fi 7»}
+        \end{itemize}
+      \end{block}
+    \end{column}
+  \end{columns}
+
+  \vspace{1.0em}
+  \begin{center}
+    \small
+    «Wi-Fi 7» \destaca{no es terminología IEEE}: la numeración por generaciones
+    se inventó el \textbf{3 de octubre de 2018}\\ y se asignó hacia atrás solo hasta 802.11n.
+
+    \vspace{0.7em}
+    \color{tecgris}
+    Formalmente se vota como individuo. En la práctica,
+    \textbf{diez compañías concentran la mitad} del padrón de 703 votantes.
+  \end{center}
+
+  \fuente{Wi-Fi Alliance, 3-oct-2018 \cita{12} \textbullet\ Padrón público de 802.11, jul. 2026
+          \cita{14} \textbullet\ IEEE 802 LMSC WG P\&P rev. 25 \cita{15}}
+\end{frame}
+
+% =====================================================================
+% LAMINA 5 - El proceso  [2:19-2:57]
+% =====================================================================
+\begin{frame}{El proceso: seis años y cuatro meses}
+  \vspace{0.6em}
+  \begin{center}
+  \begin{tikzpicture}[x=1cm,y=1cm]
+    \draw[very thick,tecazul,->] (0,0) -- (12.2,0);
+    \foreach \x in {0,6.2,8.6,11.4}{\draw[very thick,tecazul] (\x,-0.12) -- (\x,0.12);}
+
+    \node[align=center,anchor=south,text width=3cm] at (0.2,0.2)
+      {\scriptsize\textbf{mar. 2019}\\ Autorización\\ del proyecto};
+
+    \node[align=center,anchor=north,text width=3.2cm,acento] at (6.2,-0.25)
+      {\scriptsize\textbf{ene. 2024}\\ \textbf{Wi-Fi CERTIFIED 7}\\ \textit{18 meses antes}};
+
+    \node[align=center,anchor=south,text width=2.8cm] at (8.6,0.2)
+      {\scriptsize\textbf{sep. 2024}\\ Aprobación\\ IEEE-SA};
+
+    \node[align=center,anchor=north,text width=2.7cm] at (11.1,-0.25)
+      {\scriptsize\textbf{22 jul. 2025}\\ \textbf{Publicación}\\ 802.11be-2024};
+
+    \draw[acento,very thick] (6.2,-0.12) -- (6.2,0.12);
+  \end{tikzpicture}
+  \end{center}
+
+  \vspace{1.6cm}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.48\textwidth}
+      \begin{block}{El mercado no espera}
+        \small La certificación comercial precedió a la
+        publicación del estándar en \textbf{18 meses}.
+        Los productos se venden contra \textbf{borradores}.
+      \end{block}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \begin{block}{Aprobación $\neq$ publicación}
+        \small El borrador se titulaba \textbf{«Enmienda 8»};
+        la norma publicada, \textbf{«Enmienda 2»} ---
+        cambió la revisión base en el medio.
+      \end{block}
+    \end{column}
+  \end{columns}
+
+  \fuente{IEEE 802.11 WG, \textit{Official Project Timelines} \cita{16} \textbullet\
+          IEEE Std 802.11be-2024 \cita{10} \textbullet\ Wi-Fi CERTIFIED 7, ene-2024 \cita{13}}
+\end{frame}
+
+% =====================================================================
+% LAMINA 6 - Referencias  (no se narra; queda en pantalla en el relevo)
+% =====================================================================
+\begin{frame}[allowframebreaks]{Referencias}
+  \scriptsize
+  \setlength{\parskip}{0.15em}
+  \begin{thebibliography}{99}
+    \setbeamertemplate{bibliography item}[text]
+
+    \bibitem{fcc85} Federal Communications Commission,
+      \textit{Amendment of the Rules to Authorize Spread Spectrum and Other Wideband
+      Emissions in the Public Safety and Industrial, Scientific, Medical Bands},
+      First Report and Order, Docket No.~81-413, adoptado el 9 de mayo de 1985.
+
+    \bibitem{std97} \textit{IEEE Standard for Wireless LAN Medium Access Control (MAC)
+      and Physical Layer (PHY) Specifications}, IEEE Std 802.11-1997, 1997.
+
+    \bibitem{std11a} \textit{High-Speed Physical Layer in the 5 GHz Band},
+      IEEE Std 802.11a-1999, 1999.
+
+    \bibitem{std11b} \textit{Higher-Speed Physical Layer Extension in the 2.4 GHz Band},
+      IEEE Std 802.11b-1999, 1999.
+
+    \bibitem{hayes} ``Vic Hayes,'' \textit{Engineering and Technology History Wiki}.
+       \url{https://ethw.org/Vic_Hayes}
+
+    \bibitem{std11g} \textit{Further Higher Data Rate Extension in the 2.4 GHz Band},
+      IEEE Std 802.11g-2003, 2003.
+
+    \bibitem{std11n} \textit{Enhancements for Higher Throughput},
+      IEEE Std 802.11n-2009, 2009.
+
+    \bibitem{std11ac} \textit{Enhancements for Very High Throughput for Operation
+      in Bands below 6 GHz}, IEEE Std 802.11ac-2013, 2013.
+
+    \framebreak
+
+    \bibitem{std11ax} \textit{Enhancements for High-Efficiency WLAN},
+      IEEE Std 802.11ax-2021, 2021.
+
+    \bibitem{std11be} \textit{Amendment 2: Enhancements for Extremely High Throughput (EHT)},
+      IEEE Std 802.11be-2024, publicado el 22 de julio de 2025.\\ \hspace*{0pt}\url{https://standards.ieee.org/ieee/802.11be/7516/}
+
+    \bibitem{fcc6g} Federal Communications Commission, \textit{Unlicensed Use of the
+      6 GHz Band}, Report and Order, ET Docket No.~18-295, abril de 2020.
+
+    \bibitem{wfa18} Wi-Fi Alliance, ``Wi-Fi Alliance introduces Wi-Fi 6,''
+      3 de octubre de 2018.\\ \hspace*{0pt}\url{https://www.wi-fi.org/news-events/newsroom/wi-fi-alliance-introduces-wi-fi-6}
+
+    \bibitem{wfa24} Wi-Fi Alliance, ``Wi-Fi Alliance introduces Wi-Fi CERTIFIED 7,''
+      8 de enero de 2024.\\ \hspace*{0pt}\url{https://www.wi-fi.org/news-events/newsroom/wi-fi-alliance-introduces-wi-fi-certified-7}
+
+    \bibitem{members} IEEE 802.11 Working Group, \textit{Members and Affiliations}
+      (padrón público), consultado en julio de 2026.\\ \hspace*{0pt}\url{https://www.ieee802.org/11/members.html}
+
+    \bibitem{pnp} IEEE 802 LAN/MAN Standards Committee, \textit{Working Group Policies
+      and Procedures}, rev.~25, 15 de julio de 2022.
+
+    \bibitem{timelines} IEEE 802.11 Working Group, \textit{Official IEEE 802.11 Working
+      Group Project Timelines}.\\ \hspace*{0pt}\url{https://www.ieee802.org/11/Reports/802.11_Timelines.htm}
+  \end{thebibliography}
+\end{frame}
+
+\end{document}
