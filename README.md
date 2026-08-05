@@ -1,15 +1,18 @@
-# Rol B — Modelo de canal · Equipo 4, Wi‑Fi / IEEE 802.11be
+# Roles A y B — Transmisor y Modelo de canal · Equipo 4, Wi‑Fi / IEEE 802.11be
 
-**Marco Zolla** · MP‑6159 Interfaces de Comunicaciones — Maestría en Electrónica, TEC
+**Marco Zolla y Equipo 4** · MP‑6159 Interfaces de Comunicaciones — Maestría en Electrónica, TEC
 
-Este repositorio contiene **únicamente el trabajo del rol B (canal)** y el segmento de video
-«Historia y estandarización». El resto de los roles (transmisor, receptor, validación,
+Este repositorio contiene **el trabajo del rol A (transmisor) y del rol B (canal)**, así como el segmento de video
+«Historia y estandarización». El resto de los roles (receptor, validación,
 integración) vive en el repositorio del equipo.
 
 ---
 
-## Entregable rol B
-> **Enunciado, rol B:** *«Modelar un único escenario de canal representativo (alcance
+## Entregables Roles A y B
+
+> **Enunciado, rol A (Transmisor):** *«Generar una forma de onda 802.11 conforme (p. ej. 802.11be / Wi-Fi 7): ancho de banda de canal, MCS, flujos espaciales (MIMO).»*
+
+> **Enunciado, rol B (Canal):** *«Modelar un único escenario de canal representativo (alcance
 > acotado: sin barrido de sensibilidad). Resultado: modelo de canal parametrizado y
 > justificado con literatura o especificación del estándar.»*
 >
@@ -17,11 +20,13 @@ integración) vive en el repositorio del equipo.
 
 | Archivo | Qué es |
 |---|---|
-| `matlab/channel_config.m` | **El entregable.** Firma congelada por contrato con el equipo. |
+| `matlab/transmisor.m` | **Entregable Rol A.** Script de generación de forma de onda Tx para 802.11be. |
+| **`docs/JUSTIFICACION_TRANSMISOR.md`** | **Análisis de la configuración Rol A.** |
+| `matlab/channel_config.m` | **Entregable Rol B.** Firma congelada por contrato con el equipo. |
 | `matlab/test_channel.m` | Arnés propio: genera un PPDU real, lo pasa por el canal y produce las figuras. |
 | `matlab/verificacion_regimen.m` | Caracterización del modelo: mide dónde ocurre la transición LOS→NLOS. |
 | `figuras/` | Las tres figuras del segmento de canal. |
-| **`docs/JUSTIFICACION_CANAL.md`** | **El entregable que se califica (15 %).** Los tres argumentos, verificación y preguntas anticipadas. |
+| **`docs/JUSTIFICACION_CANAL.md`** | **El entregable de canal que se califica (15 %).** Los tres argumentos, verificación y preguntas anticipadas. |
 | `docs/PROCEDENCIA_canal.md` | Diff contra el ejemplo oficial de MathWorks + valores medidos. |
 | `docs/GUION_historia_estandarizacion.md` | Guion del video (2:57). |
 | `docs/INVESTIGACION_historia_estandarizacion.md` | Dossier de investigación. |
