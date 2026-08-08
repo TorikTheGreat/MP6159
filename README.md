@@ -1,14 +1,15 @@
-# Roles A y B — Transmisor y Modelo de canal · Equipo 4, Wi‑Fi / IEEE 802.11be
+# Roles A, B y C — Transmisor, Canal y Receptor · Equipo 4, Wi‑Fi / IEEE 802.11be
 
 **Marco Zolla y Equipo 4** · MP‑6159 Interfaces de Comunicaciones — Maestría en Electrónica, TEC
 
-Este repositorio contiene **el trabajo del rol A (transmisor) y del rol B (canal)**, así como el segmento de video
-«Historia y estandarización». El resto de los roles (receptor, validación,
-integración) vive en el repositorio del equipo.
+Este repositorio contiene **el trabajo del rol A (transmisor), rol B (canal) y
+rol C (receptor base sin validación)**, así como el segmento de video
+«Historia y estandarización». La validación de métricas y la integración final
+se mantienen como trabajo del equipo completo.
 
 ---
 
-## Entregables Roles A y B
+## Entregables Roles A, B y C
 
 > **Enunciado, rol A (Transmisor):** *«Generar una forma de onda 802.11 conforme (p. ej. 802.11be / Wi-Fi 7): ancho de banda de canal, MCS, flujos espaciales (MIMO).»*
 
@@ -25,9 +26,11 @@ integración) vive en el repositorio del equipo.
 | `matlab/channel_config.m` | **Entregable Rol B.** Firma congelada por contrato con el equipo. |
 | `matlab/test_channel.m` | Arnés propio: genera un PPDU real, lo pasa por el canal y produce las figuras. |
 | `matlab/verificacion_regimen.m` | Caracterización del modelo: mide dónde ocurre la transición LOS→NLOS. |
+| `matlab/receptor_wifi.m` | **Entregable Rol C (solo receptor).** Detecta paquete, recorta la PPDU Rx y grafica señal recibida en tiempo para comparación rápida. |
 | `figuras/` | Las tres figuras del segmento de canal. |
 | **`docs/JUSTIFICACION_CANAL.md`** | **El entregable de canal que se califica (15 %).** Los tres argumentos, verificación y preguntas anticipadas. |
 | `docs/PROCEDENCIA_canal.md` | Diff contra el ejemplo oficial de MathWorks + valores medidos. |
+| `docs/ROL_C_RECEPTOR.md` | Guía del Rol C (receptor): alcance, ejecución y prueba rápida. |
 | `docs/GUION_historia_estandarizacion.md` | Guion del video (2:57). |
 | `docs/INVESTIGACION_historia_estandarizacion.md` | Dossier de investigación. |
 | `docs/slides/` | Láminas Beamer del segmento. |
@@ -41,6 +44,7 @@ integración) vive en el repositorio del equipo.
 cd matlab
 test_channel            % canal + PPDU real + las tres figuras
 verificacion_regimen    % (opcional) mide la transicion LOS -> NLOS
+receptor_wifi           % receptor base (sin validacion), con grafica Rx en tiempo
 ```
 
 Salida verificada en MATLAB R2025b (WLAN Toolbox 25.2):
